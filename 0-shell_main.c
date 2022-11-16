@@ -32,3 +32,4 @@ int main(int argc __attribute__((unused)), char **argv)
 		shell_execute(args, cmd_type);
 	}
 	return (1);
+}
