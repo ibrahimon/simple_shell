@@ -52,8 +52,8 @@ char *_getline(void)
 		position++;
 		if (position >= bufSize)
 		{
-			bufSize += READ_BUF;
-			buffer = _realloc(buffer, READ_BUF, bufSize);
+			bufSize += INPUT_BUF;
+			buffer = _realloc(buffer, INPUT_BUF, bufSize);
 			if (!buffer)
 			{
 				perror("Failed to re-allocate a space in the memory");

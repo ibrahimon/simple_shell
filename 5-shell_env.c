@@ -18,8 +18,9 @@ char *_getenv(char *path)
 		{
 			if (*pair == '=')
 				break;
-			if (*pair == '=' && *name == '\0')
-				return (pair + 1);
 		}
+		if (*pair == '=' && *name == '\0')
+			return (pair + 1);
+	}
 		return (NULL);
 }
