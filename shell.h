@@ -4,10 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
-#include <unistd.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+#include <dirent.h>
+#include <signal.h>
 
 
 
@@ -26,6 +29,10 @@
 /* Global environ variable */
 
 extern char **environ;
+extern char *line;
+extern char **commands;
+extern char *shell_name;
+extern int status;
 
 typedef struct internal_func
 {
@@ -35,29 +42,33 @@ typedef struct internal_func
 
 /* builtin command */
 void env(char **);
-void ch_dir(char **);
 void quit(char **);
 
 /* shell utility function */
 void ctrl_C(int);
 char *_getline(void);
 char **tokenize(char *, const char *);
-void shell_execute(char **, int);
+void execute_command(char **tokenized_command, int command_type);
 int check_command(char *);
-void execute(char **, int);
+int parse_command(char *);
 
 /* shell helper function */
 int print(char *, int);
 void (*get_func(char *))(char **);
+void remove_comment(char *);
 
 /* shell string functions */
 int _strlen(char *);
 int _strcmp(char*, char *);
+void remove_newline(char *);
 
 /* shell memory management */
 void *_realloc(void *, int, int);
 
 /* environment path */
 char *_getenv(char *);
+
+extern void non_inactive(void);
+extern void initial(char **current_command, int type_command);
 
 #endif

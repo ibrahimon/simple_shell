@@ -1,6 +1,39 @@
 #include "shell.h"
 
 /**
+ *  parse_command - determines the type of the command
+ *  @command: the command
+ *  Return: constant representing the type of the command
+ */
+
+int parse_command(char *command)
+{
+	int i;
+	char *internal_command[] = {"env", "exit", NULL};
+	char *path = NULL;
+	
+	for (i = 0; command[i] != '\0'; i++)
+	{
+		if (command[i] == '/')
+			return (INTERNAL_CMD);
+	}
+	for (i = 0; internal_command[i] != NULL; i++)
+	{
+		if (_strcmp(command, internal_command[i]) == 0)
+			return (EXTERNAL_CMD);
+	}
+	path = check_path(command);
+	if (path != NULL)
+	{
+		free(path);
+		return (PATH_COMMAND);
+	}
+	return (INVALID_COMMAND);
+}
+
+
+
+/**
  * ctrl_C - activate ctrl c
  * @signum: the signal number
  * Return: void
@@ -141,26 +174,38 @@ int is_delimeter(const char *delimeters, char c)
  * Return: void
  */
 
-void shell_execute(char **command, int cmd_type)
+void execute_command(char **tokenized_command, int command_type)
 {
-	int stat;
-	pid_t PID;
-
-	if (cmd_type == EXTERNAL_CMD || cmd_type == PATH_CMD)
+	void (*func)(char **command);
+	if (command_type == EXTERNAL_COMMAND)
 	{
-		PID = fork();
-		if (PID == 0)
-			execute(command, cmd_type);
-		if (PID < 0)
+		if (execve(tokenized_command[0], tokenized_command, NULL) == -1)
 		{
-			perror("failed to call fork");
-			exit(1);
+			perror(_getenv("PWD"));
+			exit(2);
 		}
-		else
-			wait(&stat);
 	}
-	else
-		execute(command, cmd_type);
+		if (command_type == PATH_COMMAND)
+		{
+			if (execve(check_path(tokenized_command[0]), tokenized_command, NULL) == -1)
+			{
+				perror(_getenv("PWD"));
+				exit(2);
+			}
+		}
+		if (command_type == INTERNAL_COMMAND)
+		{
+			func = get_func(tokenized_command[0]);
+			func(tokenized_command);
+		}
+		if (command_type == INVALID_COMMAND)
+		{
+			print(shell_name, STDERR_FILENO);
+			print(": 1: ", STDERR_FILENO);
+			print(tokenized_command[0], STDERR_FILENO);
+			print(": not found\n", STDERR_FILENO);
+			status = 127;
+		}
 }
 
 /**
